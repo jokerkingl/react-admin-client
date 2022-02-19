@@ -1,12 +1,12 @@
 /*
-* 柱状图路由
+* 饼状图路由
 * */
 import React from "react"
 
-function Bar(){
+function Pie(){
     return (
-        <div>hello world</div>
+        <div>pie</div>
     )
 }
 
-export default Bar
+export default Pie

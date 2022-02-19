@@ -1,37 +1,38 @@
-import React, { useEffect, useRef } from "react"
+import React, {forwardRef, useEffect} from "react"
 // antd
 import {Form, Input, Select, Modal, message} from "antd"
 // api
-import { reqAddUser } from "../../api";
+import { reqAddUser, reqUpdateUser } from "../../api";
 const {Item} = Form
 const { Option } = Select
 
-const useResetFormOnCloseModal = ({ form, visible }) => {
-    const prevVisibleRef = useRef();
-    useEffect(() => {
-        prevVisibleRef.current = visible;
-    }, [visible]);
-    const prevVisible = prevVisibleRef.current;
-    useEffect(() => {
-        if (!visible && prevVisible) {
-            form.resetFields();
-        }
-    // eslint-disable-next-line
-    }, [visible]);
-};
-
-const UserAddUpdate = ({isUserAdd, roles, onCancel, setFlag})=>{
+const UserAddUpdate = forwardRef((props, ref)=>{
+    const {roles, visible, setFlag, onCancel, selectUser} = props
     const [form] = Form.useForm();
     const onFinish = async (value)=>{
-        const result = await reqAddUser(value)
-        if(result.status === 0){
-            message.success("添加用户成功")
-            form.resetFields()
-            onCancel()
-            setFlag()
+        if(selectUser){
+            const result = await reqUpdateUser({_id: selectUser._id, ...value})
+            if(result.status === 0){
+                message.success("更新用户成功")
+                form.resetFields()
+                onCancel()
+                setFlag()
+            }
+            else{
+                message.error("更新用户失败 请重试或检查网络设置")
+            }
         }
         else{
-            message.error("添加用户失败 请重试或检查网络设置")
+            const result = await reqAddUser(value)
+            if(result.status === 0){
+                message.success("添加用户成功")
+                form.resetFields()
+                onCancel()
+                setFlag()
+            }
+            else{
+                message.error("添加用户失败 请重试或检查网络设置")
+            }
         }
     }
 
@@ -39,18 +40,19 @@ const UserAddUpdate = ({isUserAdd, roles, onCancel, setFlag})=>{
         form.submit();
     };
 
-    useResetFormOnCloseModal({
-        form,
-        isUserAdd
-    })
+    useEffect(()=>{
+        form.resetFields()
+    // eslint-disable-next-line
+    }, [selectUser])
 
     return (
-        <Modal title="添加用户" visible={isUserAdd} onOk={onOk} onCancel={onCancel}>
+        <Modal title="添加用户" visible={visible} onOk={onOk} onCancel={onCancel}>
             <Form
                 onFinish={onFinish}
                 labelCol={{span: 4}}
                 wrapperCol={{span: 15, offset: 1}}
                 scrollToFirstError
+                initialValues={selectUser}
                 name={"userAdd"}
                 form={form}
             >
@@ -61,13 +63,17 @@ const UserAddUpdate = ({isUserAdd, roles, onCancel, setFlag})=>{
                 >
                     <Input placeholder="请输入用户名" />
                 </Item>
-                <Item
-                    name={"password"}
-                    label="密码"
-                    rules={[{required: true, message: 'Please input your password!'}]}
-                >
-                    <Input type={"password"} placeholder="请输入密码" />
-                </Item>
+                {
+                    selectUser==={}?(
+                        <Item
+                            name={"password"}
+                            label="密码"
+                            rules={[{required: true, message: 'Please input your password!'}]}
+                        >
+                            <Input type={"password"} placeholder="请输入密码"/>
+                        </Item>
+                    ):""
+                }
                 <Item
                     name={"phone"}
                     label="手机号"
@@ -105,7 +111,7 @@ const UserAddUpdate = ({isUserAdd, roles, onCancel, setFlag})=>{
             </Form>
         </Modal>
     )
-}
+})
 
 export default UserAddUpdate
 

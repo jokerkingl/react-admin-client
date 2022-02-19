@@ -1,20 +1,21 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 // antd
-import {Card, Form, Input, InputNumber, Cascader, Button, Upload, message} from "antd"
-import {ArrowLeftOutlined, LoadingOutlined, PlusOutlined} from "@ant-design/icons";
+import { Card, Form, Input, InputNumber, Cascader, Button, message } from "antd"
+import { ArrowLeftOutlined } from "@ant-design/icons";
 // useState
 import useFetchState from "../../utils/useFetchState";
 // react-router-dom
 import { useLocation, useNavigate } from "react-router-dom";
 // api
-import { reqCategories, reqRemoveImg } from "../../api";
+import { reqCategories, reqUpdateAddProduct } from "../../api";
+// component
+import PicturesWall from "./picturesWall";
+import RichText from "./richText";
 
 const { Item } = Form
 const { TextArea } = Input;
 
 const AddUpdate = () => {
-    const BAST_IMG_URL = "http://localhost:3000"
-
     const navigate = useNavigate()
     const location = useLocation()
 
@@ -31,65 +32,28 @@ const AddUpdate = () => {
     )
     // 设置selected option
     const [options, setOptions] =  useFetchState("")
-    // 设置 image loading
-    const [loading] = useFetchState("")
-    const [fileList, setFileList] = useFetchState(
-       product.imgs.map((img, index)=>({
-           uid: -index,
-           name: img,
-           status: "done",
-           url: BAST_IMG_URL + img
-       }))
-    );
-    const [uploadButton, setUploadButton] = useFetchState("")
+
+    const editor = useRef("")
+    const pictureList = useRef("")
 
     // 表单提交
-    const onFinish = (values) => {
-        console.log(values)
-        console.log(fileList.map(file=>file.name))
+    const onFinish = async (values) => {
+        const {name, desc, price, category} = values
+        const [pCategoryId, categoryId] = category
+        const detail = editor.current.getDetail()
+        const imgs = pictureList.current.getImgList().map(item=>item.name)
+        const productSubmit = {
+            name, desc, price, pCategoryId, categoryId, detail, imgs
+        }
+        if(flag) productSubmit._id = product._id
+        // console.log(productSubmit)
+        const result = await reqUpdateAddProduct(productSubmit)
+        if(result.status === 0){
+            message.success(`${flag?"更新":"添加"}成功`)
+            console.log(result.data)
+            navigate("/product")
+        }else message.error(`${flag?"更新":"添加"}失败`)
     }
-
-    // 图片 onChange
-    const onChange = async ({ fileList: newFileList, file }) => {
-        if(file.status === "done"){
-            const result = file.response
-            if(result.status===0){
-                message.success("上传图片成功").then()
-                const {url, name} = result.data
-                file = newFileList[newFileList.length-1]
-                file.name = name
-                file.url = url
-            }else {
-                message.error("上传图片失败").then()
-            }
-        }
-        else if(file.status === "removed"){
-            const result = await reqRemoveImg(file.name)
-            console.log(result)
-            if(result.status===0){
-                message.success("删除成功").then()
-            }
-            else{
-                message.error("删除失败").then()
-            }
-        }
-        setFileList(newFileList);
-    };
-
-    const onPreview = async file => {
-        let src = file.url;
-        if (!src) {
-            src = await new Promise(resolve => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file.originFileObj);
-                reader.onload = () => resolve(reader.result);
-            });
-        }
-        const image = new Image();
-        image.src = src;
-        const imgWindow = window.open(src);
-        imgWindow.document.write(image.outerHTML);
-    };
 
     const getCategories = async (parentId)=>{
         const result = await reqCategories(parentId)
@@ -99,21 +63,6 @@ const AddUpdate = () => {
         else{
             message.error("请求错误")
         }
-    }
-
-    const loadData = async selectedOptions => {
-        const targetOption = selectedOptions[selectedOptions.length - 1];
-        targetOption.loading = true;
-
-        // load options lazily
-        const data = await getCategories(targetOption.value)
-        targetOption.loading = false;
-        targetOption.children = data.map(item=>({
-            value: item._id,
-            label: item.name,
-            isLeaf: true
-        }))
-        setOptions([...options]);
     }
 
     useEffect(()=>{
@@ -139,23 +88,31 @@ const AddUpdate = () => {
             setOptions(tempOptions)
         }
         fetchData().then()
-
-        setUploadButton(
-            <div>
-                {loading ? <LoadingOutlined /> : <PlusOutlined />}
-                <div style={{ marginTop: 8 }}>Upload</div>
-            </div>
-        );
-        // eslint-disable-next-line
+    // eslint-disable-next-line
     }, [])
+
+    const loadData = async selectedOptions => {
+        const targetOption = selectedOptions[selectedOptions.length - 1];
+        targetOption.loading = true;
+
+        // load options lazily
+        const data = await getCategories(targetOption.value)
+        targetOption.loading = false;
+        targetOption.children = data.map(item=>({
+            value: item._id,
+            label: item.name,
+            isLeaf: true
+        }))
+        setOptions([...options]);
+    }
 
     return (
         <>
             <Card title={title} className={"card-addUpdate"}>
                 <Form
-                    labelCol={{span: 4}}
-                    wrapperCol={{span: 19, offset: 1}}
-                    name="register"
+                    labelCol={{span: 2}}
+                    wrapperCol={{span: 12, offset: 1}}
+                    name="addUpdate"
                     onFinish={onFinish}
                     scrollToFirstError
                     className={"form"}
@@ -171,7 +128,7 @@ const AddUpdate = () => {
                         ]}
                         initialValue={product.name}
                     >
-                        <Input/>
+                        <Input placeholder={"商品名称"}/>
                     </Item>
 
                     <Item
@@ -219,29 +176,10 @@ const AddUpdate = () => {
                         />
                     </Item>
 
-                    <Item
-                        name="img"
-                        label="商品图片"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Please upload product image!',
-                            },
-                        ]}
-                    >
-                        <Upload
-                            action="/manage/img/upload"
-                            accept={"image/*"}
-                            listType="picture-card"
-                            fileList={fileList}
-                            name={"image"}
-                            onChange={onChange}
-                            onPreview={onPreview}
-                        >
-                            {fileList.length < 5 && (
-                                uploadButton
-                            )}
-                        </Upload>
+                    <PicturesWall imgs={product.imgs} ref={pictureList} />
+
+                    <Item label={"商品详情"} wrapperCol={{span: 21, offset: 1}}>
+                        <RichText ref={editor} detail={product.detail} />
                     </Item>
 
                     <Item wrapperCol={{ offset: 12, span: 12 }}>

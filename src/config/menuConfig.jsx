@@ -8,7 +8,8 @@ import {
     AppstoreOutlined,
     BarChartOutlined,
     LineChartOutlined,
-    PieChartOutlined
+    PieChartOutlined,
+    FormOutlined
 } from '@ant-design/icons';
 
 const menuConfig= [
@@ -23,17 +24,23 @@ const menuConfig= [
     {
         title: '商品',
         key: '/goods',
-        icon: 'AppstoreOutlined',
+        icon: function icon(){
+            return <AppstoreOutlined />
+        },
         children: [ // 子菜单列表
             {
                 title: '品类管理',
                 key: '/category',
-                icon: 'BarsOutlined'
+                icon: function icon(){
+                    return <BarsOutlined />
+                },
             },
             {
                 title: '商品管理',
                 key: '/product',
-                icon: 'ToolOutlined'
+                icon: function icon(){
+                    return <ToolOutlined />
+                },
             },
         ]
     },
@@ -41,41 +48,61 @@ const menuConfig= [
     {
         title: '用户管理',
         key: '/user',
-        icon: 'UserOutlined'
+        icon: function icon(){
+            return <UserOutlined />
+        },
     },
     {
         title: '角色管理',
         key: '/role',
-        icon: 'SafetyCertificateOutlined',
+        icon: function icon(){
+            return <SafetyCertificateOutlined />
+        },
     },
 
     {
         title: '图形图表',
         key: '/charts',
-        icon: 'AreaChartOutlined',
+        icon: function icon(){
+            return <AreaChartOutlined />
+        },
         children: [
             {
                 title: '柱形图',
                 key: '/charts/bar',
-                icon: 'BarChartOutlined'
+                icon: function icon(){
+                    return <BarChartOutlined />
+                },
             },
             {
                 title: '折线图',
                 key: '/charts/line',
-                icon: 'LineChartOutlined'
+                icon: function icon(){
+                    return <LineChartOutlined />
+                },
             },
             {
                 title: '饼图',
                 key: '/charts/pie',
-                icon: 'PieChartOutlined'
+                icon: function icon(){
+                    return <PieChartOutlined />
+                },
             },
         ]
     },
-
+    {
+        title: '测试',
+        key: '/test',
+        icon: function icon(){
+            return <FormOutlined />
+        },
+    },
     {
         title: '订单管理',
         key: '/order',
-        icon: 'windows',
+        icon: function icon(){
+            return <AppstoreOutlined />
+        },
     },
 ]
 

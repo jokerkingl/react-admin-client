@@ -1,9 +1,12 @@
+/*
+* 折线图路由
+* */
 import React from "react"
 
-function Bar(){
+function Line(){
     return (
-        <div>hello world</div>
+        <div>line</div>
     )
 }
 
-export default Bar
+export default Line

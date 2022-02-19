@@ -12,7 +12,7 @@ export default class App extends Component{
            <BrowserRouter>
                <Routes>{/*只匹配其中一个*/}
                    <Route path="/login" element={<Login />} />
-                   <Route path="/" element={<Admin />} />
+                   <Route path="/*" element={<Admin />} />
                </Routes>
            </BrowserRouter>
        )

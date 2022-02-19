@@ -1,9 +1,12 @@
+/*
+* 柱状图路由
+* */
 import React from "react"
 
-function Charts(){
+function Bar(){
     return (
-        <div>hello world</div>
+        <div>bar</div>
     )
 }
 
-export default Charts
+export default Bar

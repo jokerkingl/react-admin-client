@@ -1,9 +1,9 @@
 import React from "react"
 
-function Category(){
+function Home(){
     return (
-        <div>hello world</div>
+        <div>home</div>
     )
 }
 
-export default Category
+export default Home
