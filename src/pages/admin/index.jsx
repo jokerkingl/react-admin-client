@@ -4,8 +4,6 @@
 import React from 'react';
 import {Route, Routes, Navigate} from "react-router-dom";
 import { Layout } from 'antd';
-// storage
-import storageUtils from "../../utils/storageUtils";
 // style
 import "./admin.less"
 // component
@@ -21,11 +19,14 @@ import Bar from "../charts/bar"
 import Line from "../charts/line"
 import Pie from "../charts/pie"
 import Test from "../test"
+import NotFound from "../not-found";
+
+import {useSelector} from "react-redux";
 
 const { Footer, Sider, Content } = Layout;
 
 function Admin() {
-    const user = storageUtils.getUser()
+    const user = useSelector(state => state.user.user)
     // 没有登陆则返回登陆页面
     if(!user || !user._id){
         return <Navigate to="/login"/>
@@ -40,6 +41,7 @@ function Admin() {
                 <Header />
                 <Content className="content">
                     <Routes>
+                        <Route exact path="/" element={<Home />} />
                         <Route path={"/home"} element={<Home />}/>
                         <Route path={"/category"} element={<Category />}/>
                         <Route path={"/product/*"} element={<Product />}/>
@@ -49,7 +51,7 @@ function Admin() {
                         <Route path={"/charts/line"} element={<Line />}/>
                         <Route path={"/charts/pie"} element={<Pie />}/>
                         <Route path={"/test"} element={<Test />}/>
-                        <Route path="*" element={<Navigate to="/home" />} />
+                        <Route path="*" element={<NotFound />} />
                     </Routes>
                 </Content>
                 <Footer className="footer">Footer</Footer>

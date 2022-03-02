@@ -64,12 +64,13 @@ const UserAddUpdate = forwardRef((props, ref)=>{
                     <Input placeholder="请输入用户名" />
                 </Item>
                 {
-                    selectUser==={}?(
+                    JSON.stringify(selectUser)==="{}"?(
                         <Item
                             name={"password"}
                             label="密码"
                             rules={[{required: true, message: 'Please input your password!'}]}
                         >
+
                             <Input type={"password"} placeholder="请输入密码"/>
                         </Item>
                     ):""

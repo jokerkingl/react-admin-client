@@ -2,35 +2,35 @@
 * 左侧导航组件
 * */
 import React, {useEffect, useRef} from "react"
-import {useLocation, useNavigate} from "react-router-dom";
+import {useLocation} from "react-router-dom";
 // style
 import "./header.less"
-// storage
-import storage from "../../utils/storageUtils"
 // date
 import {formatDate} from "../../utils/dateUtils";
 // weather
 import {reqWeather} from "../../api";
-// menuList
-import menuConfig from "../../config/menuConfig"
 // antd
 import { Modal, Button, Space } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 // setFetchState
 import useFetchState from "../../utils/useFetchState"
+// redux
+import {useDispatch, useSelector} from "react-redux";
+import {logout} from "../../redux/action";
 
 const Header = ()=>{
+    const dispatch = useDispatch()
+    const location = useLocation()
+    const { confirm } = Modal;
     // state
     const [date, setDate] = useFetchState("")
-    const [username, setUsername] = useFetchState("")
     const [icon, setIcon] = useFetchState("")
     const [text, setText] = useFetchState("")
-    const [title, setTitle] = useFetchState("")
-    const location = useLocation()
-    const navigate = useNavigate()
-    const { confirm } = Modal;
+
     let interval=useRef(null)
-    const defaultKey = useRef("")
+
+    const title = useSelector(state=> state.headTitle)
+    const user = useSelector(state => state.user.user)
 
     // logout
     function showConfirm() {
@@ -38,38 +38,20 @@ const Header = ()=>{
             icon: <ExclamationCircleOutlined />,
             content: '确定退出吗？',
             onOk() {
-                storage.removeUser()
-                navigate("/login")
+                dispatch(logout())
             },
         });
     }
 
     // component
     useEffect( ()=> {
-        if(location.pathname.indexOf("/product") === 0) defaultKey.current = "/" + location.pathname.split("/")[1]
-        else defaultKey.current = location.pathname
         const fetchData = async() => {
-            // 获取username
-            setUsername(storage.getUser().username)
             // 获取天气情况
             const result = await reqWeather()
             if(result.code === '200'){
                 setIcon(result.daily[0].iconDay)
                 setText(result.daily[0].textDay)
             }
-
-            // 获取title
-            const getTitle = (menuList)=>{
-                menuList.forEach(item=>{
-                    if(item.children){
-                        getTitle(item.children)
-                    }
-                    else if(item.key === defaultKey.current){
-                        setTitle(item.title)
-                    }
-                })
-            }
-            getTitle(menuConfig)
         }
         fetchData().then()
     // eslint-disable-next-line
@@ -94,9 +76,9 @@ const Header = ()=>{
     return (
         <div className="head">
             <div className={"head-top"}>
-                <span>欢迎,{username}</span>
+                <span>欢迎,{user.username}</span>
                 <Space className={"logout"}>
-                    <Button className={"logoutButton"} onClick={showConfirm}>退出</Button>
+                    <Button type="primary" onClick={showConfirm}>退出</Button>
                 </Space>
             </div>
             <div className={"head-bottom"}>

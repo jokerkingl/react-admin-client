@@ -11,47 +11,30 @@ import logo from "../../assets/img/logo.png"
 import { Menu } from 'antd';
 // config
 import menuConfig from "../../config/menuConfig";
-import storageUtils from "../../utils/storageUtils";
+// redux
+import {useDispatch, useSelector} from "react-redux";
+import { setHeadTitle } from "../../redux/action";
 
 const LeftNav = () => {
     const { SubMenu } = Menu;
     const location = useLocation()
     let openKey
-    let defaultKey
-    let menuNodes
+    const defaultKey = location.pathname.indexOf("/product") === 0 ? "/" + location.pathname.split("/")[1] : location.pathname
 
-    // 根据 menu 对应的数据数组生成对应的标签数组 map
-    /*const getMenuNodes_map = (menuList) => {
-        return menuList.map((item) => {
-            if(!item.children){
-                return (
-                    <Menu.Item key={item.key} icon={<item.icon />}>
-                        <Link to={item.key}>{item.title}</Link>
-                    </Menu.Item>
-                )
-            }
-            else {
-                return (
-                    <SubMenu key={item.key} icon={<item.icon />} title={item.title}>
-                        {getMenuNodes_map(item.children)}
-                    </SubMenu>
-                )
-            }
-        })
-    }*/
+    const dispatch = useDispatch()
+    const user = useSelector(state => state.user.user)
 
     const hasAuth = (item)=>{
-        const name = storageUtils.getUser().username
-        const menus = storageUtils.getUser().role.menus
+        const name = user.username
+        const menus = user.role.menus
         return name==="admin" || menus.find(menu=>menu===item.key) || (item.children && item.children.find(child=>menus.indexOf(child.key)!==-1))
     }
 
     // 根据 menu 对应的数据数组生成对应的标签数组 reduce
     const getMenuNodes_reduce = (menuList) => {
-        if(location.pathname.indexOf("/product") === 0) defaultKey = "/" + location.pathname.split("/")[1]
-        else defaultKey = location.pathname
         return menuList.reduce((pre, item)=>{
             if(hasAuth(item)){
+                if(item.key === defaultKey) dispatch(setHeadTitle(item.title))
                 if (!item.children){
                     pre.push(
                         <Menu.Item key={item.key} icon={<item.icon />}>
@@ -73,7 +56,7 @@ const LeftNav = () => {
             return pre
         }, [])
     }
-    menuNodes = getMenuNodes_reduce(menuConfig)
+    const menuNodes = getMenuNodes_reduce(menuConfig)
 
     // return
     return (

@@ -97,13 +97,6 @@ const menuConfig= [
             return <FormOutlined />
         },
     },
-    {
-        title: '订单管理',
-        key: '/order',
-        icon: function icon(){
-            return <AppstoreOutlined />
-        },
-    },
 ]
 
 export default menuConfig

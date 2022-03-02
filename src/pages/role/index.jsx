@@ -11,8 +11,8 @@ import { formatDate } from "../../utils/dateUtils";
 import { reqRoleList, reqAddRole, reqRemoveRole, reqUpdateRole } from "../../api";
 // component
 import AuthForm from "./auth_form";
-// storage
-import storageUtils from "../../utils/storageUtils";
+// redux
+import {useSelector} from "react-redux";
 
 const Role = ()=>{
     const [selectRole, setSelectRole] = useFetchState("")
@@ -60,6 +60,8 @@ const Role = ()=>{
 
     const checkedKeys = useRef()
 
+    const user = useSelector(state => state.user.user)
+
     const onRow = role=>{
         return {
             onClick: ()=> {
@@ -93,7 +95,7 @@ const Role = ()=>{
     const updateRole = () => {
         const fetchData = async () => {
             selectRole.menus = checkedKeys.current.getCheckedKeys()
-            selectRole.auth_name = storageUtils.getUser().username
+            selectRole.auth_name = user.username
             const result = await reqUpdateRole(selectRole)
             if(result.status === 0){
                 message.success("更新成功")

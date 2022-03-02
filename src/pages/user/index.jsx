@@ -17,7 +17,7 @@ const User = () => {
     const [isUserRemove, setIsUserRemove] = useFetchState(false)
     const [selectUser, setSelectUser] = useFetchState("")
     const [flag, setFlag] = useFetchState(false)
-    const title = (
+    const [title] = useFetchState(
         <Button type={"primary"} onClick={() => {
             setIsShow(true)
             setSelectUser(null)

@@ -1,36 +1,37 @@
 /*
 * 登陆的路由组件
 * */
-import React from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import React, {useEffect} from 'react';
+import { Navigate } from 'react-router-dom';
 import { Form, Input, Button, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 // logo
 import logo from "../../assets/img/logo.png"
-// api
-import {reqLogin} from "../../api"
 // style
 import "./login.less"
-// storage
-import storageUtils from "../../utils/storageUtils";
+// redux
+import { login } from "../../redux/action";
+import {useDispatch, useSelector} from "react-redux";
 
 function Login(){
-    const navigate = useNavigate();
+    const dispatch = useDispatch()
 
     // 如果用户登录 跳转到 admin 页面
-    const user = storageUtils.getUser()
-    if(user && user._id) return <Navigate to="/" />
+    const user = useSelector(state => state.user.user)
+    const errorMsg = useSelector(state => state.user.errorMsg)
+    const successMsg = useSelector(state => state.user.successMsg)
+
+    useEffect(()=>{
+        if(successMsg) message.success(successMsg).then()
+    }, [successMsg])
+
+    if(user && user._id) return <Navigate to="/home" />
+
     // 提交信息
-    const onFinish = async (values) => {
-        const response = await reqLogin(values.username, values.password)
-        if(response.status===0) {
-            // 存储用户信息
-            storageUtils.saveUser(response.data)
-            // 跳转页面
-            navigate('/')
-            message.success("登陆成功").then()
-        }
-        else message.error("用户名密码错误").then()
+    const onFinish = (values) => {
+        const {username, password} = values
+        dispatch(login(username, password))
+        if(errorMsg) message.error(errorMsg).then()
     };
 
     const getFiledValue = (rule, value) => {
